@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body>
+    <center>
+        <h1 class="display-1">Admin Panel : : WINNEXT</h1>
+    </center>
+    <div class="hamburger" id="hamburgerr">
+        <button class="btn btn-light" onclick="fetchData1()">USER</button>
+        <button class="btn btn-light" onclick="fetchData2()">DOCTORS</button>
+    </div>
+    <div class="display" id="data">
+        <br><br>
+        <center>
+            <h1 id="heading"></h1>
+        </center>
+        <div id="newdoc">
+            <form id="docnew">
+                Doctor's Name <br>
+                <input type="text" name="name"><br>
+                Doctor's E-mail<br>
+                <input type="email" name="mail"><br>
+                Doctor's Phone Number<br>
+                <input type="number" name="phno"><br>
+                Doctor's Specialization<br>
+                <input type="text" name="special"><br> <br>
+                <center>
+                    <input type="submit"></input>
+                </center>
+            </form>
+            <br>
+            <button class="btn btn-light" onclick="hide2()">Cancel</button>
+        </div>
+        <br><br>
+        <div id="dd">
+            <button class="btn btn-light" onclick="show2()">New Doctor Upload</button>
+        </div>
+        <br><br>
+        <div id="table-container" class="table table-hover "></div>
+    </div>
+    <div id="editdoc">
+        <form id="docupd">
+            Doctor's Name <br>
+            <input type="text" id="dname" name="name"><br>
+            Doctor's E-mail<br>
+            <input type="email" id="dmail" name="mail"><br>
+            Doctor's Phone Number<br>
+            <input type="number" id="dphno" name="phno"><br>
+            Doctor's Specialization<br>
+            <input type="text" id="dspl" name="special"><br><br>
+            <center>
+                <input type="submit"></input>
+            </center>
+        </form><br>
+        <button class="btn btn-light" onclick="hide()">Cancel</button>
+    </div>
+</body>
+
+<script>
+    let user = []
+    let doctor = []
+    const fetchData1 = async () => {
+        document.getElementById('dd').style.display = 'none';
+        document.getElementById('heading').textContent = 'USERS';
+        try {
+            const response = await fetch('http://localhost:3007/api/allUsers/');
+            let result = await response.json();
+            user = result;
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        await apiResponseToTable1(user, "table-container");
+    };
+    const fetchData2 = async () => {
+        document.getElementById('dd').style.display = 'flex';
+
+        document.getElementById('heading').textContent = 'DOCTORS';
+        try {
+            const response = await fetch('http://localhost:3007/api/allDoctors/');
+            let result = await response.json();
+            doctor = result;
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        await apiResponseToTable2(doctor, "table-container");
+    };
+    function apiResponseToTable1(data, choose) {
+        let html = '<table width="100%" class="table table-hover ">';
+        html += `<tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>PhoneNumber</th>
+            <th>Specialization</th>
+            <th>Query</th>
+            <th>Action</th>
+            </tr>`;
+        data.forEach(row => {
+            html += '<tr>';
+            html += `<td>${row.userName}</td>`;
+            html += `<td>${row.userEmail}</td>`;
+            html += `<td>${row.userPhoneNumber}</td>`;
+            html += `<td>${row.userSpecialization}</td>`;
+            html += `<td>${row.userQuery}</td>`;
+            html += `<td><button class="btn btn-light" onclick="deleteUser('${row.userId}')">Delete</button></td>`;
+            html += '</tr>';
+        });
+        html += '</table>';
+        document.getElementById(choose).innerHTML = html;
+    }
+    function apiResponseToTable2(data, choose) {
+        let html = '<table width="100%" class="table table-hover ">';
+        html += `<tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>PhoneNumber</th>
+            <th>Specialization</th>
+            <th>Action</th>
+            </tr>`;
+        data.forEach(row => {
+            html += '<tr>';
+            html += `<td>${row.doctorName}</td>`;
+            html += `<td>${row.doctorEmail}</td>`;
+            html += `<td>${row.doctorPhoneNumber}</td>`;
+            html += `<td>${row.doctorSpecialization}</td>`;
+            html += `<td><button class="btn btn-light" onclick="editDoc('${row.doctorId}')">Edit</button> <button  class="btn btn-light" onclick="deleteDoctor('${row.doctorId}')">Delete</button></td>`;
+            html += '</tr>';
+        });
+        html += '</table>';
+        document.getElementById(choose).innerHTML = html;
+    }
+    async function deleteUser(moodId) {
+        try {
+            const response = await fetch(`http://localhost:3007/api/deleteQuery/${moodId}`, {
+                method: 'DELETE',
+            });
+            const data = await response.text();
+            console.log('user deleted successfully:', data);
+            await fetchData1();
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    }
+    async function deleteDoctor(moodId) {
+        try {
+            const response = await fetch(`http://localhost:3007/api/deleteDoctor/${moodId}`, {
+                method: 'DELETE',
+            });
+            const data = await response.text();
+            console.log('user deleted successfully:', data);
+            await fetchData2();
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    }
+    let editdocc = null;
+    const editDoc = async (docc) => {
+        // const doc = JSON.parse(docc);
+        editdocc = docc;
+        console.log('hey')
+        console.log(docc)
+        document.getElementById('editdoc').style.display = 'flex';
+
+        try {
+            const response = await fetch('http://localhost:3007/api/doctor/' + docc);
+            let result = await response.json();
+            docc = result;
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+
+        document.getElementById('dname').value = docc.doctorName;
+        document.getElementById('dmail').value = docc.doctorEmail;
+        document.getElementById('dphno').value = docc.doctorPhoneNumber;
+        document.getElementById('dspl').value = docc.doctorSpecialization;
+
+    }
+    document.getElementById('docupd').addEventListener('submit', async (e) => {
+
+        hide();
+        alert('Changes will take place after you refresh the page')
+        e.preventDefault();
+        const upd = {
+            doctorName: e.target.name.value,
+            doctorEmail: e.target.mail.value,
+            doctorPhoneNumber: e.target.phno.value,
+            doctorSpecialization: e.target.special.value
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3007/api/doctorupd/${editdocc}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(upd)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update doctor');
+            }
+
+            console.log('Doctor updated successfully');
+            fetchData2();
+        } catch (error) {
+            console.error('Error updating doctor:', error);
+        }
+    })
+    document.getElementById('docnew').addEventListener('submit', async (e) => {
+        hide2();
+        e.preventDefault();
+        const upd = {
+            name: e.target.name.value,
+            mail: e.target.mail.value,
+            phno: e.target.phno.value,
+            spec: e.target.special.value
+        }
+        console.log(upd)
+        try {
+            const response = await fetch(`http://localhost:3007/api/newDoctor/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(upd)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update doctor');
+            }
+
+            console.log('Doctor uploaded successfully');
+            fetchData2();
+        } catch (error) {
+            console.error('Error updating doctor:', error);
+        }
+    })
+
+    const hide = () => { document.getElementById('editdoc').style.display = 'none'; }
+    const hide2 = () => { document.getElementById('newdoc').style.display = 'none'; }
+    const show2 = () => { document.getElementById('newdoc').style.display = 'flex'; }
+</script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        font-family: 'Open Sans';
+    }
+
+    #editdoc,
+    #newdoc {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: aqua;
+        position: fixed;
+        top: 25%;
+        left: 25%;
+        width: 500px;
+        height: 300px;
+    }
+
+    #dd {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        display: none;
+    }
+
+    .hamburger {
+        width: 100%;
+        display: flex;
+        justify-content: space-evenly;
+    }
+
+    .hamburger button {
+        width: 40%;
+        height: 30px;
+        border: 0;
+    }
+
+    .hamburger button:hover {
+        border: 1px red solid;
+    }
+</style>
+
+</html>

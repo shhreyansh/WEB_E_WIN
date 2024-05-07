@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WINNEXT</title>
+</head>
+
+<!--
+<style>
+    body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+h2 {
+  text-align: center;
+  margin-top: 50px;
+}
+
+form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='tel'],
+textarea {
+  width: 98%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+input[type='submit'] {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input[type='submit']:hover {
+  background-color: #45a049;
+}
+
+button {
+  background-color: #008CBA;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #005f73;
+}
+
+@media screen and (max-width: 768px) {
+  form {
+    padding: 10px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  input[type='text'],
+  input[type='email'],
+  input[type='tel'],
+  textarea {
+    width: calc(100% - 20px);
+  }
+
+  input[type='submit'],
+  button {
+    width: 100%;
+  }
+}
+
+</style>
+-->
+
+<body>
+
+    <h2> Query Form :: WINNEXT</h2>
+    <form id='form'>
+        <label>Name:</label><br>
+        <input type="text" id="name" name="name" title="name" required><br><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="phone">Phone Number:</label><br>
+        <input type="tel" id="phone" name="phone" required><br><br>
+
+        <label for="specialization">Specialization:</label><br>
+
+
+
+
+        <div id="parentDiv">
+
+        </div>
+        
+        
+        
+        <br><br>
+        Query: <br>
+        <input type="text" title="describe your query" name="query" id="query" required></input >
+        <br> <br>
+        <center>
+        <input type="submit" value="Submit">
+    </center>
+    </form>
+    <button onclick="records()"> See Records</button>
+</body>
+
+<script>
+const records = () => {
+    window.location.href = "records.html";
+}
+
+document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const upd = {
+        name: e.target.name.value,
+        mail: e.target.email.value,
+        num: e.target.phone.value,
+        special: e.target.specialization.value, // This line is causing the error
+        query: e.target.query.value
+    }
+    const response = await fetch(`http://localhost:3007/api/newQuery/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(upd)
+    });
+    alert('Query SUbmitted');
+})
+
+async function createSelectWithOptions() {
+    try {
+        // Fetch specializations
+        const response = await fetch(`http://localhost:3007/api/allDoctors/`);
+        const result = await response.json();
+        const specializationsSet = new Set(result.map(doctor => doctor.doctorSpecialization));
+
+        // Convert set to array
+        const specializations = Array.from(specializationsSet);
+
+        // Create a select element
+        const selectElement = document.createElement('select');
+        selectElement.setAttribute('id', 'specialization'); // Set id for the select element
+
+        // Iterate through the array of specializations
+        specializations.forEach(specialization => {
+            // Create an option element for each specialization
+            const optionElement = document.createElement('option');
+            optionElement.value = specialization;
+            optionElement.textContent = specialization;
+
+            // Append the option element to the select element
+            selectElement.appendChild(optionElement);
+        });
+
+        // Get the parent element where you want to append the select input
+        const parentElement = document.getElementById('parentDiv');
+
+        // Append the select input to the parent element
+        parentElement.appendChild(selectElement);
+    } catch (error) {
+        console.error("Error fetching specializations:", error);
+    }
+}
+
+// Call the function to create select input with options when the page loads
+window.onload = createSelectWithOptions;
+
+</script>
+
+</html>
